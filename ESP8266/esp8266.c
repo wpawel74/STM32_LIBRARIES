@@ -83,11 +83,13 @@
 /* Debug */
 #define ESP8266_DEBUG(x)               printf("%s", x)
 
-#ifdef ESP8266_USE_OBSOLETE
+#if ESP8266_USE_AT_OBSOLETE == 1
 #define ESP8266_CUR
+#define ESP8266_DEF
 #else
 #define ESP8266_CUR                    "_CUR"
-#endif // ESP8266_USE_OBSOLETE
+#define ESP8266_DEF                    "_DEF"
+#endif // ESP8266_USE_AT_OBSOLETE
 
 /* Wrapper for sending strings */
 #define ESP8266_USARTSENDSTRING(str)   ESP8266_LL_USARTSend((uint8_t *)(str), strlen((char *)(str)))
@@ -432,7 +434,7 @@ ESP8266_Result_t ESP8266_SetUART(ESP8266_t* ESP8266, uint32_t baudrate) {
 
 ESP8266_Result_t ESP8266_SetUARTDefault(ESP8266_t* ESP8266, uint32_t baudrate) {
 	/* Set default baudrate */
-	return SendUARTCommand(ESP8266, baudrate, "AT+UART_DEF");
+	return SendUARTCommand(ESP8266, baudrate, "AT+UART" ESP8266_DEF);
 }
 
 ESP8266_Result_t ESP8266_SetSleepMode(ESP8266_t* ESP8266, ESP8266_SleepMode_t SleepMode) {
@@ -978,7 +980,7 @@ ESP8266_Result_t ESP8266_WifiConnectDefault(ESP8266_t* ESP8266, const char* ssid
 	ESP8266_CHECK_IDLE(ESP8266);
 	
 	/* Send commands separate with escape strings */
-	ESP8266_USARTSENDSTRING("AT+CWJAP_DEF=\"");
+	ESP8266_USARTSENDSTRING("AT+CWJAP" ESP8266_DEF "=\"");
 	EscapeStringAndSend((char *)ssid);
 	ESP8266_USARTSENDSTRING("\",\"");
 	EscapeStringAndSend((char *)pass);
@@ -1072,7 +1074,7 @@ ESP8266_Result_t ESP8266_SetSTAMAC(ESP8266_t* ESP8266, uint8_t* addr) {
 
 ESP8266_Result_t ESP8266_SetSTAMACDefault(ESP8266_t* ESP8266, uint8_t* addr) {
 	/* Send current MAC command */
-	return SendMACCommand(ESP8266, addr, "AT+CIPSTAMAC_DEF", ESP8266_COMMAND_CIPSTAMAC);
+	return SendMACCommand(ESP8266, addr, "AT+CIPSTAMAC" ESP8266_DEF, ESP8266_COMMAND_CIPSTAMAC);
 }
 
 ESP8266_Result_t ESP8266_GetAPMAC(ESP8266_t* ESP8266) {	
@@ -1096,7 +1098,7 @@ ESP8266_Result_t ESP8266_SetAPMAC(ESP8266_t* ESP8266, uint8_t* addr) {
 
 ESP8266_Result_t ESP8266_SetAPMACDefault(ESP8266_t* ESP8266, uint8_t* addr) {
 	/* Send current MAC command */
-	return SendMACCommand(ESP8266, addr, "AT+CIPAPMAC_DEF", ESP8266_COMMAND_CIPAPMAC);
+	return SendMACCommand(ESP8266, addr, "AT+CIPAPMAC" ESP8266_DEF, ESP8266_COMMAND_CIPAPMAC);
 }
 
 /******************************************/
@@ -1195,7 +1197,7 @@ ESP8266_Result_t ESP8266_SetAPDefault(ESP8266_t* ESP8266, ESP8266_APConfig_t* ES
 	hid = (uint8_t)ESP8266_Config->Hidden + '0';
 	
 	/* Send separate */
-	ESP8266_USARTSENDSTRING("AT+CWSAP_DEF=\"");
+	ESP8266_USARTSENDSTRING("AT+CWSAP" ESP8266_DEF "=\"");
 	EscapeStringAndSend(ESP8266_Config->SSID);
 	ESP8266_USARTSENDSTRING("\",\"");
 	EscapeStringAndSend(ESP8266_Config->Pass);
