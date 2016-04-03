@@ -89,7 +89,7 @@ extern "C" {
  */
 
 /* This settings should not be modified */
-#define ESP8266_MAX_CONNECTIONS        1	//5  /*!< Number of maximum active connections on ESP */
+#define ESP8266_MAX_CONNECTIONS        2	//5  /*!< Number of maximum active connections on ESP */
 #define ESP8266_MAX_CONNECTEDSTATIONS  2	//10 /*!< Number of AP stations saved to received data array */
 
 /* Check for GNUC */
@@ -209,6 +209,7 @@ typedef struct {
 	ESP8266_ConnectionType_t Type; /*!< Connection type. Parameter is valid only if connection is made as client */
 	uint32_t BytesReceived;      /*!< Number of bytes received in current +IPD data package. U
                                         Use @arg DataSize to detect how many data bytes are in current package when callback function is called for received data */
+	uint32_t BytesToSend;
 	uint32_t TotalBytesReceived; /*!< Number of bytes received in entire connection lifecycle */
 	uint8_t WaitForWrapper;      /*!< Status flag, to wait for ">" wrapper on data sent */
 	uint8_t WaitingSentRespond;  /*!< Set to 1 when we have sent data and we are waiting respond */
@@ -283,8 +284,8 @@ typedef struct {
  * \brief  Access point configuration
  */
 typedef struct {
-	char* SSID;             /*!< Network public name for ESP AP mode */
-	char* Pass;             /*!< Network password for ESP AP mode */
+	char SSID[ESP8266_MAX_SSID_NAME];       /*!< Network public name for ESP AP mode */
+	char Pass[ESP8266_MAX_SSID_PASSWORD];   /*!< Network password for ESP AP mode */
 	ESP8266_Ecn_t Ecn;      /*!< Security of Wi-Fi spot. This parameter can be a value of \ref ESP8266_Ecn_t enumeration */
 	uint8_t Channel;        /*!< Channel Wi-Fi is operating at */
 	uint8_t MaxConnections; /*!< Max number of stations that are allowed to connect to ESP AP, between 1 and 4 */
@@ -323,6 +324,16 @@ typedef struct {
 	uint32_t Time;
 } ESP8266_SNTP_t;
 
+typedef enum {
+	ESP8266_Normal_IPD = 0x00,
+	ESP8266_Extended_IPD = 0x01,
+} ESP8266_CIPInfo_t;
+
+typedef enum {
+	ESP8266_CIPMux_0 = 0x00,
+	ESP8266_CIPMux_1 = 0x01
+} ESP8266_CIPMux_t;
+
 /**
  * \brief  Main ESP8266 working structure
  */
@@ -347,6 +358,8 @@ typedef struct {
 	ESP8266_Mode_t Mode;                                      /*!< AT/STA mode which is currently active. This parameter can be a value of \ref ESP8266_Mode_t enumeration */
 	ESP8266_APConfig_t AP;                                    /*!< Configuration settings for ESP when using as Access point mode */
 	ESP8266_IPD_t IPD;                                        /*!< IPD status structure. Used when new data are available from module */
+	ESP8266_CIPInfo_t CIPInfo;
+	ESP8266_CIPMux_t CIPMux;
 #if ESP8266_USE_PING == 1
 	ESP8266_Ping_t Pinging;                                   /*!< Pinging structure */
 #endif
@@ -376,6 +389,7 @@ typedef struct {
 			uint8_t LastOperationStatus:1;                    /*!< Last operations status was OK */
 			uint8_t WifiConnected:1;                          /*!< Wifi is connected to network */
 			uint8_t WifiGotIP:1;                              /*!< Wifi got IP address from network */
+			uint8_t WifiGotMode:1;                            /*!< Wifi got mode */
 		} F;
 		uint32_t Value;
 	} Flags;
@@ -538,6 +552,13 @@ ESP8266_Result_t ESP8266_WifiDisconnect(ESP8266_t* ESP8266);
  * \note   This function is blocking function and will wait till ESP8266 sends result
  */
 ESP8266_Result_t ESP8266_SetMode(ESP8266_t* ESP8266, ESP8266_Mode_t Mode);
+
+/**
+ * \brief  Gets mode for ESP8266, either STA, AP or both
+ * \param  *ESP8266: Pointer to working \ref ESP8266_t structure
+ * \retval Member of \ref ESP8266_Result_t enumeration
+ */
+ESP8266_Result_t ESP8266_GetMode(ESP8266_t* ESP8266);
 
 /**
  * \brief  Sets WPS mode for ESP8266
@@ -775,6 +796,15 @@ ESP8266_Result_t ESP8266_CloseConnection(ESP8266_t* ESP8266, ESP8266_Connection_
  * \retval Member of \ref ESP8266_Result_t enumeration
  */
 ESP8266_Result_t ESP8266_AllConectionsClosed(ESP8266_t* ESP8266);
+
+/**
+ * \brief  Makes a request to send amount bytes to specific open connection
+ * \param  *ESP8266: Pointer to working \ref ESP8266_t structure
+ * \param  *Connection: Pointer to \ref ESP8266_Connection_t structure to close it
+ * \param  Bytes: Amount of bytes
+ * \retval Member of \ref ESP8266_Result_t enumeration
+ */
+ESP8266_Result_t ESP8266_RequestSendBytes(ESP8266_t* ESP8266, ESP8266_Connection_t* Connection, int Bytes);
 
 /**
  * \brief  Makes a request to send data to specific open connection
