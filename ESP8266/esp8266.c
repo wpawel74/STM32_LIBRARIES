@@ -311,13 +311,13 @@ ESP8266_Result_t ESP8266_Init(ESP8266_t* ESP8266, uint32_t baudrate) {
 	
 #if ESP8266_ECHO
 	/* Enable echo if not already */
-	//SendCommand(ESP8266, ESP8266_COMMAND_ATE, "ATE1\r\n", "ATE1");
+	SendCommand(ESP8266, ESP8266_COMMAND_ATE, "ATE1\r\n", "ATE1");
 #else
 	/* Disable echo if not already */
-	//SendCommand(ESP8266, ESP8266_COMMAND_ATE, "ATE0\r\n", "ATE0");
+	SendCommand(ESP8266, ESP8266_COMMAND_ATE, "ATE0\r\n", "ATE0");
 #endif
 	/* Wait till idle */
-	//ESP8266_WaitReady(ESP8266);
+	ESP8266_WaitReady(ESP8266);
 
 	/* Enable multiple connections */
 	while (ESP8266_SetMux(ESP8266, 1) != ESP_OK);
