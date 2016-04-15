@@ -215,7 +215,7 @@ __weak void TM_EXTI_Handler(uint16_t GPIO_Pin) {
 /*              STM32F4xx and STM32F7xx IRQ handlers              */
 /******************************************************************/
 
-#if defined(STM32F4xx) || defined(STM32F7xx)
+#if defined(STM32F4xx) || defined(STM32F7xx) || defined(STM32F1xx)
 
 #ifndef TM_EXTI_DISABLE_DEFAULT_HANDLER_0
 void EXTI0_IRQHandler(void) {
