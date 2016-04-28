@@ -16,7 +16,7 @@
 */
 #include <stdlib.h>
 #include <string.h>
-#include "ug2864_ll_template.h"
+#include "ug2864_ll.h"
 #include "ug2864.h"
 
 // a 5x7 font table
